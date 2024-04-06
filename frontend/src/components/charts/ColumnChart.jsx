@@ -1,7 +1,8 @@
 import React from 'react';
 import Chart from 'react-apexcharts';
 
-const ColumnChart = ({ data }) => {
+const ColumnChart = () => {
+  const data = 42;
   const options = {
     chart: {
       type: 'bar',
