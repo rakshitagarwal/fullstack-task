@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-export const fetchUsers = createAsyncThunk("users/fetchUsers", async (pageNumber) => {
-    const response = await fetch(`https://swapi.dev/api/people/?page=${pageNumber}`);
+export const fetchUsers = createAsyncThunk("users/fetchUsers", async () => {
+    const response = await fetch(`http://localhost:5000/`);
     if (response.status === 200) {
       const data = await response.json();
       const fetchData = {
