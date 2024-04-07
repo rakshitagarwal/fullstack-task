@@ -1,12 +1,23 @@
 import React from 'react';
 import Chart from 'react-apexcharts';
 
-const SemiCircleGaugeChart = ({selected, columns, rowsData}) => {
-  console.log('selected',selected);
-  console.log('colDefs',columns);
-  console.log('rowsData',rowsData);
+const SemiCircleGaugeChart = ({ chartName, selected, columns, rowsData}) => {
+  console.log('selected', selected);
+  console.log('colDefs', columns);
+  console.log('rowsData', rowsData);
 
-  const chartData = 70; // Example value for the gauge chart
+  // Step 1: Find the index of the selected item
+  const selectedIndex = columns.indexOf(selected);
+
+  // Step 2: Extract values corresponding to the selected key
+  const selectedValues = rowsData.map(row => row[selected]);
+
+  // Step 3: Calculate the average value
+  const sum = selectedValues.reduce((acc, val) => acc + val, 0);
+  const average = sum / selectedValues.length;
+
+  // Step 4: Use the average value as chartData
+  const chartData = Math.round(average); // Round the average value for chart data
 
   const options = {
     chart: {
@@ -60,12 +71,15 @@ const SemiCircleGaugeChart = ({selected, columns, rowsData}) => {
   };
 
   return (
+    <div>
+    <h2>{chartName}</h2>
     <Chart
       options={options}
       series={[chartData]}
       type="radialBar"
       width="100%"
     />
+    </div>
   );
 };
 

@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import prisma from "./config/db.js";
+import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
@@ -10,45 +10,69 @@ const PORT = process.env.PORT || 5001;
 app.use(cors());
 app.use(express.json());
 
-//ROUTES//
-
-// create / insertion
+// create data
 app.post("/api/v1", async (req, res) => {
   try {
-    const { userData } = req.body;
-    const newTodo = await prisma.user.create({
-      data: userData,
-    });
-    if (newTodo) console.log(newTodo);
-    res.status(201).json({ msg: "data created successfully" });
-  } catch (err) {
-    console.error(err.message);
-  }
-});
-
-//get all data
-app.get("/api/v1", async (req, res) => {
-  try {
-    const allTodos = await prisma.user.findMany();
-    res.status(200).json(allTodos.rows);
-  } catch (err) {
-    console.error(err.message);
-  }
-});
-
-//get one data
-app.get("/api/v1/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    console.log("get data", req.params);
-
-    const todo = await prisma.user.findFirst({
-      where: {
-        id: id,
+    const { headers, rows, tableName, datatypeName } = req.body;
+    const result = await prisma.dynamicTable.create({
+      data: {
+        tableName,
+        datatypeName,
+        headers,
+        rows,
       },
     });
-    console.log(todo);
-    res.status(200).json(todo.rows[0]);
+   
+    res.status(201).json({ ...result });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// insert a new record
+app.post("/api/v1/add", async (req, res) => {
+  try {
+    const dataAdd = req.body;
+    const FindData = await prisma.dynamicTable.findFirst({
+      where: {
+        tableName: dataAdd.tableName,
+        datatypeName: dataAdd.datatypeName,
+      },
+      orderBy: {
+        id: "asc",
+      },
+    });
+    const addedRows = FindData.rows;
+    addedRows.push(dataAdd.value);
+    const result = await prisma.dynamicTable.update({
+      where: {
+        id: FindData.id,
+      },
+      data: { rows: addedRows },
+    });
+    res.status(201).json({ ...result });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+//get all table details
+app.get("/api/v1", async (req, res) => {
+  try {
+    const dataView = req.body;
+    const FindData = await prisma.dynamicTable.findFirst({
+      where: {
+        tableName: dataView.tableName,
+        datatypeName: dataView.datatypeName,
+      },
+      orderBy: {
+        id: "asc",
+      },
+    });
+    // console.log("records found",FindData);
+    res.status(200).json({ msg: "Data found successfully" });
   } catch (err) {
     console.error(err.message);
   }
@@ -58,18 +82,25 @@ app.get("/api/v1/:id", async (req, res) => {
 app.put("/api/v1/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    console.log("update data", req.body);
-    const { description } = req.body;
-    const updateTodo = await prisma.user.update({
+    const dataEdit = req.body.data;
+    const FindData = await prisma.dynamicTable.findFirst({
       where: {
-        id: id,
+        tableName: dataEdit.tableName,
+        datatypeName: dataEdit.datatypeName,
       },
-      data: {
-        description: description,
+      orderBy: {
+        id: "asc",
       },
     });
-    console.log(updateTodo);
-    res.status(200).json("Todo was updated!");
+    let updatedRows = FindData.rows;
+    updatedRows[+id] = dataEdit.value;
+    const result = await prisma.dynamicTable.update({
+      where: {
+        id: FindData.id,
+      },
+      data: { rows: updatedRows },
+    });
+    res.status(200).json({ ...result });
   } catch (err) {
     console.error(err.message);
   }
@@ -79,26 +110,29 @@ app.put("/api/v1/:id", async (req, res) => {
 app.delete("/api/v1/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    console.log("delete data", req.params);
-
-    const deleteTodo = await prisma.user.delete({
+    const dataDelete = req.body;
+    const FindData = await prisma.dynamicTable.findFirst({
       where: {
-        id: id,
+        tableName: dataDelete.tableName,
+        datatypeName: dataDelete.datatypeName,
+      },
+      orderBy: {
+        id: "asc",
       },
     });
-    console.log(deleteTodo);
-    res.status(200).json("Todo was deleted!");
+    const delVal = FindData.rows[+id];
+    let updatedRows = FindData.rows.filter((row) => row !== delVal);
+    const result = await prisma.dynamicTable.update({
+      where: {
+        id: FindData.id,
+      },
+      data: { rows: updatedRows },
+    });
+    res.status(200).json({ ...result });
   } catch (err) {
     console.log(err.message);
   }
 });
-
-// testing
-const testDB = async () => {
-  const users = await prisma.user.findMany();
-  if (users )console.log('Database connection established');
-};
-testDB();
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}!`);

@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, TextField, Button } from "@mui/material";
-import "./ModalPopup.css";
+import "./CreateTable.css";
 
-const ModalPopup = ({ isOpen, onClose, onInputSubmit }) => {
+const CreateTable = ({ isOpen, onClose, onInputSubmit }) => {
   const [tableName, setTableName] = useState("");
   const [datatypeName, setDatatypeName] = useState("");
   const [isValid, setIsValid] = useState(false); // State to track form validity
@@ -11,6 +11,13 @@ const ModalPopup = ({ isOpen, onClose, onInputSubmit }) => {
   const updateValidity = () => {
     setIsValid(tableName.trim() !== "" && datatypeName.trim() !== "");
   };
+
+  // Reset validity when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      updateValidity();
+    }
+  }, [isOpen]);
 
   const handleSubmit = () => {
     if (isValid) {
@@ -53,13 +60,15 @@ const ModalPopup = ({ isOpen, onClose, onInputSubmit }) => {
           margin="normal"
           required
         />
-        <Button onClick={handleSubmit} disabled={!isValid}>
-          Submit
-        </Button>
-        <Button onClick={onClose}>Close</Button>
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button onClick={handleSubmit} disabled={!isValid}>
+            Create Table
+          </Button>
+        </div>
       </div>
     </Modal>
   );
 };
 
-export default ModalPopup;
+export default CreateTable;

@@ -1,14 +1,34 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
+const initialState = {
+  data: [],
+  loading: false,
+  error: null,
+}
+
 // create action
 export const createData = createAsyncThunk(
   "createData",
   async (data, { rejectWithValue }) => {
-    console.log("data", data);
     try {
       const response = await axios.post("http://localhost:5000/api/v1", data);
-      return response.data;
+      console.log("create data in slice", response.data);
+      return  response.data;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
+
+// insert action
+export const insertRow = createAsyncThunk(
+  "insertRow",
+  async (toInsert, { rejectWithValue }) => {
+    try {
+      const response = await axios.post("http://localhost:5000/api/v1/add", toInsert);
+      console.log("insert data in slice",response.data);
+      return  response.data;
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -16,11 +36,12 @@ export const createData = createAsyncThunk(
 );
 
 // read action
-export const showData = createAsyncThunk(
-  "showData",
-  async (_, { rejectWithValue }) => {
+export const readData = createAsyncThunk(
+  "readData",
+  async (toView, { rejectWithValue }) => {
     try {
-      const response = await axios.get("http://localhost:5000/api/v1");
+      const response = await axios.get("http://localhost:5000/api/v1", {toView});
+      console.log("read data in slice",response.data);
       return response.data;
     } catch (error) {
       return rejectWithValue(error);
@@ -31,10 +52,11 @@ export const showData = createAsyncThunk(
 // update action
 export const updateData = createAsyncThunk(
   "updateData",
-  async (data, { rejectWithValue }) => {
-    console.log("updated data", data);
+  async (toEdit, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`http://localhost:5000/api/v1/${data.id}`, data);
+      const {index , ...data} = toEdit;
+      const response = await axios.put(`http://localhost:5000/api/v1/${index}`, {data});
+      console.log("update data in slice",response.data);
       return response.data;
     } catch (error) {
       return rejectWithValue(error);
@@ -45,10 +67,12 @@ export const updateData = createAsyncThunk(
 // delete action
 export const deleteData = createAsyncThunk(
   "deleteData",
-  async (id, { rejectWithValue }) => {
+  async (toDelete, { rejectWithValue }) => {
     try {
-      await axios.delete(`http://localhost:5000/api/v1/${id}`);
-      return { id };
+      const {index , ...data} = toDelete;
+      const response = await axios.delete(`http://localhost:5000/api/v1/${index}`, { data });
+      console.log("delete data in slice",response.data);
+      return response.data;
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -57,65 +81,70 @@ export const deleteData = createAsyncThunk(
 
 export const excelSlice = createSlice({
   name: "excel",
-  initialState: {
-    data: [],
-    loading: false,
-    error: null,
-  },
-
+  initialState: initialState,
   reducers: {},
 
   extraReducers: (builder) => {
     builder
-      .addCase(createData.pending, (state) => {
-        state.loading = true;
-      })
       .addCase(createData.fulfilled, (state, action) => {
         state.loading = false;
-        state.data.push(action.payload);
+        state.data = state.data.length ? [...state.data, action.payload] : [action.payload]; 
       })
-      .addCase(createData.rejected, (state, action) => {
+      .addCase(insertRow.fulfilled, (state, action) => {
         state.loading = false;
-        state.error = action.payload.message;
+        let temp = state.data;
+        for (let i = 0; i < temp.length; i++){
+          if (temp[i].id === action.payload.id){
+            temp[i] = action.payload;
+          }
+        }
+        state.data = temp; 
       })
-      .addCase(showData.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(showData.fulfilled, (state, action) => {
+      .addCase(readData.fulfilled, (state, action) => {
         state.loading = false;
         state.data = action.payload;
       })
-      .addCase(showData.rejected, (state, action) => {
+      .addCase(updateData.fulfilled, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
-      })
-      .addCase(deleteData.pending, (state) => {
-        state.loading = true;
+        let temp = state.data;
+        for (let i = 0; i < temp.length; i++){
+          if (temp[i].id === action.payload.id){
+            temp[i] = action.payload;
+          }
+        }
+        state.data = temp; 
       })
       .addCase(deleteData.fulfilled, (state, action) => {
         state.loading = false;
-        const { id } = action.payload;
-        if (id) {
-          state.data = state.data.filter((ele) => ele.id !== id);
+        let temp = state.data;
+        for (let i = 0; i < temp.length; i++){
+          if (temp[i].id === action.payload.id){
+            temp[i] = action.payload;
+          }
         }
+        state.data = temp; 
       })
-      .addCase(deleteData.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-      .addCase(updateData.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(updateData.fulfilled, (state, action) => {
-        state.loading = false;
-        state.data = state.data.map((ele) =>
-          ele.id === action.payload.id ? action.payload : ele
-        );
-      })
-      .addCase(updateData.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload.message;
-      });
+      .addMatcher(
+        (action) =>
+          action.type.endsWith("/pending") || action.type.endsWith("/rejected"),
+        (state) => {
+          state.loading = true;
+        }
+      )
+      .addMatcher(
+        (action) => action.type.endsWith("/fulfilled"),
+        (state, action) => {
+          state.error = null;
+        }
+      )
+      .addMatcher(
+        (action) =>
+          action.type.endsWith("/rejected"),
+        (state, action) => {
+          state.loading = false;
+          state.error = action.payload.message;
+        }
+      );
   },
 });
 

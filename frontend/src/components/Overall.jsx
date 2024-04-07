@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import ModalPopup from "./ModalPopup";
-import UserTable from "./UserTable";
+import CreateTable from "./modals/CreateTable";
+import UserTable from "./tables/UserTable";
 import { Button } from '@mui/material';
 
 const Overall = () => {
@@ -29,7 +29,7 @@ const Overall = () => {
           <Button variant="contained" color="primary" onClick={handleButtonClick}>Create Table</Button>
         </div>
       )}
-      <ModalPopup
+      <CreateTable
         isOpen={isPopupVisible} // Pass the state to control modal visibility
         onClose={handlePopupClose} // Pass the handler function to close the modal
         onInputSubmit={handleTableNameInput}

@@ -12,7 +12,7 @@ import {
   Select,
 } from "@mui/material";
 
-const ChartSelect = ({ isOpen, dataset, onClose, onInputSubmit }) => {
+const ChartSelect = ({ isOpen, dataset, columns, onClose, onInputSubmit }) => {
   const [step, setStep] = useState(1);
   const [selectedChart, setSelectedChart] = useState(null);
   const [widgetTitle, setWidgetTitle] = useState("");
@@ -48,6 +48,7 @@ const ChartSelect = ({ isOpen, dataset, onClose, onInputSubmit }) => {
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
+          width: "400px", // Set a fixed width for the modal content
           backgroundColor: "white",
           padding: "20px",
           borderRadius: "8px",
@@ -56,7 +57,9 @@ const ChartSelect = ({ isOpen, dataset, onClose, onInputSubmit }) => {
       >
         {step === 1 && (
           <div>
-            <h2>Select Chart</h2>
+            <h3>
+              <b>Select Chart Type</b>
+            </h3>
             <RadioGroup
               value={selectedChart}
               onChange={(e) => setSelectedChart(e.target.value)}
@@ -97,14 +100,19 @@ const ChartSelect = ({ isOpen, dataset, onClose, onInputSubmit }) => {
                 label="Semi Circle Gauge"
               />
             </RadioGroup>
-            <Button variant="contained" color="primary" onClick={handleNext}>
-              Next
-            </Button>
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <Button onClick={onClose}>Cancel</Button>
+              <Button variant="contained" color="primary" onClick={handleNext}>
+                Next
+              </Button>
+            </div>
           </div>
         )}
         {step === 2 && (
           <div>
-            <h2>Chart Settings</h2>
+            <h3>
+              <b>Chart Settings</b>
+            </h3>
             <TextField
               label="Widget Title"
               value={widgetTitle}
@@ -144,14 +152,31 @@ const ChartSelect = ({ isOpen, dataset, onClose, onInputSubmit }) => {
                   setField(event.target.value);
                 }}
               >
-                <MenuItem value={"Field 1"}>Field 1</MenuItem>
-                <MenuItem value={"Field 2"}>Field 2</MenuItem>
-                <MenuItem value={"Field 3"}>Field 3</MenuItem>
+                {columns.map((column, index) =>{
+                  return(
+                    <MenuItem key={index} value={column}>{column}</MenuItem>
+                  )
+                })}
               </Select>
             </FormControl>
-            <Button variant="contained" color="primary" onClick={handleSubmit}>
-              Submit
-            </Button>
+              <br />
+              <br />
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <Button
+                onClick={() => {
+                  setStep(1);
+                }}
+              >
+                Back
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSubmit}
+              >
+                Create
+              </Button>
+            </div>
           </div>
         )}
       </div>

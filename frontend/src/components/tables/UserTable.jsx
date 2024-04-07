@@ -1,34 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
 import XLSX from "xlsx";
 import { useDispatch, useSelector } from "react-redux";
-import { ThemeProvider } from "@material-ui/core/styles";
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableContainer from "@material-ui/core/TableContainer";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import Paper from "@material-ui/core/Paper";
-import IconButton from "@material-ui/core/IconButton";
-import EditIcon from "@material-ui/icons/Edit";
-import DeleteIcon from "@material-ui/icons/Delete";
-import ChartSelect from "./ChartSelect";
-import {
-  createData,
-  showData,
-  updateData,
-  deleteData,
-} from "../redux/excelSlice";
-import theme from "../utils/theme";
+import ChartSelect from "../modals/ChartSelect";
+import { createData, readData, insertRow } from "../../redux/excelSlice";
 import { Button } from "@mui/material";
-import "../App.css";
-import PieChart from "./charts/PieChart";
-import LineChart from "./charts/LineChart";
-import DoughnutChart from "./charts/DoughnutChart";
-import ColumnChart from "./charts/ColumnChart";
-import BarChart from "./charts/BarChart";
-import RadialBarChart from "./charts/RadialBartChart";
-import SemiCircleGaugeChart from "./charts/SemiCircleGauge";
+import AddRow from "../modals/AddRow";
+import PieChart from "../charts_props/PieChart";
+import LineChart from "../charts_props/LineChart";
+import DoughnutChart from "../charts_props/DoughnutChart";
+import ColumnChart from "../charts_props/ColumnChart";
+import BarChart from "../charts_props/BarChart";
+import RadialBarChart from "../charts_props/RadialBartChart";
+import SemiCircleGaugeChart from "../charts_props/SemiCircleGauge";
+import FileTable from "./FileTable";
 
 const EXTENSIONS = ["xlsx", "xls", "csv"];
 
@@ -42,21 +26,24 @@ const chartComponents = {
   7: SemiCircleGaugeChart,
 };
 
-function UserTable({tableName, datatypeName }) {
+function UserTable({ tableName, datatypeName }) {
   const dispatch = useDispatch();
   const { data, status } = useSelector((state) => state.excel);
-  console.log("state excel data: " + data, status);
-
-  const [colDefs, setColDefs] = useState();
-  const [rowsData, setData] = useState();
+  console.log("global data array", data);
+  const [colDefs, setColDefs] = useState(null);
+  const [rowsData, setData] = useState(null);
   const [chart, setChart] = useState(null);
+  const [chartName, setChartName] = useState(null);
+  const [field, setField] = useState(null);
+  const [columns, setColumns] = useState([]);
   const [isPopupVisible, setPopupVisible] = useState(false);
+  const [isAddPopup, setAddPopup] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const fileInputRef = useRef(null);
 
-  useEffect(() => {
-    dispatch(showData());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(readData({ tableName, datatypeName }));
+  // }, [dispatch]);
 
   const getExention = (file) => {
     const parts = file.name.split(".");
@@ -64,7 +51,7 @@ function UserTable({tableName, datatypeName }) {
     return EXTENSIONS.includes(extension);
   };
 
-  const convertToJson = (headers, rowsData) => {
+  const convertToJSON = (headers, rowsData) => {
     const rows = [];
     rowsData.forEach((row) => {
       let rowData = {};
@@ -89,9 +76,11 @@ function UserTable({tableName, datatypeName }) {
       const heads = headers.map((head) => ({ title: head, field: head }));
       setColDefs(heads);
       fileData.splice(0, 1);
-      const convertedData = convertToJson(headers, fileData);
+      if(!fileData[fileData.length-1].length) fileData.pop();
+      const convertedData = convertToJSON(headers, fileData);
       setData(convertedData);
-      createData(convertedData);
+      setColumns(headers);
+      dispatch(createData({headers, rows: convertedData, tableName, datatypeName }));
     };
 
     if (file) {
@@ -106,23 +95,18 @@ function UserTable({tableName, datatypeName }) {
     }
   };
 
-  const handleEditClick = (rowData) => {
-    console.log("Edit clicked for row:", rowData);
-    dispatch(updateData(rowData));
-  };
-
-  const handleDeleteClick = (rowData) => {
-    console.log("Delete clicked for row:", rowData);
-    dispatch(deleteData(rowData));
-  };
-
   const handleUploadButtonClick = () => {
     fileInputRef.current.click();
   };
 
   const handleChartInput = (input) => {
-    console.log("chartpopup", input);
     setChart(input.chart);
+    setField(input.field);
+    setChartName(input.widgetTitle);
+  };
+
+  const handleAddInput = (input) => {
+    dispatch(insertRow({ tableName, datatypeName, value: input}));
   };
 
   const openChartModal = () => {
@@ -131,6 +115,14 @@ function UserTable({tableName, datatypeName }) {
 
   const closeChartModal = () => {
     setPopupVisible(false);
+  };
+
+  const openAddModal = () => {
+    setAddPopup(true);
+  };
+
+  const closeAddModal = () => {
+    setAddPopup(false);
   };
 
   const toggleAccordion = () => {
@@ -157,6 +149,13 @@ function UserTable({tableName, datatypeName }) {
             }}
           >
             <div style={{ marginLeft: "auto", marginRight: "10px" }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={openAddModal}
+            >
+              Add Row
+            </Button>&nbsp;&nbsp;
               <Button
                 variant="contained"
                 color="primary"
@@ -180,62 +179,38 @@ function UserTable({tableName, datatypeName }) {
             </Button>
           </div>
           <br />
-          <ThemeProvider theme={theme}>
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    {colDefs &&
-                      colDefs.map((colDef) => (
-                        <TableCell key={colDef.field}>{colDef.title}</TableCell>
-                      ))}
-                    {colDefs && <TableCell>Action</TableCell>}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {rowsData &&
-                    rowsData.map((row, index) => (
-                      <TableRow key={index}>
-                        {colDefs &&
-                          colDefs.map((colDef) => (
-                            <TableCell key={colDef.field}>
-                              {row[colDef.field]}
-                            </TableCell>
-                          ))}
-                        <TableCell style={{ width: "100px" }}>
-                          {Object.keys(row).length !== 0 && (
-                            <>
-                              <IconButton
-                                aria-label="edit"
-                                onClick={() => handleEditClick(row)}
-                              >
-                                <EditIcon />
-                              </IconButton>
-                              <IconButton
-                                aria-label="delete"
-                                onClick={() => handleDeleteClick(row)}
-                              >
-                                <DeleteIcon />
-                              </IconButton>
-                            </>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </ThemeProvider>
-          {ChartComponent && <ChartComponent />}
+          {colDefs ? (
+            <FileTable colDefs={colDefs} rowsData={rowsData}  tableName={tableName} datatypeName={datatypeName} />
+          ) : (
+            <h2 style={{ textAlign: "center" }}>No Data</h2>
+          )}
+          {ChartComponent && (
+            <div style={{ width: "450px", height: "350px" }}>
+              <br />
+              <br />
+              <ChartComponent
+                chartName={chartName}
+                selected={field}
+                columns={columns}
+                rowsData={rowsData}
+              />
+            </div>
+          )}
         </>
       )}
 
-      {/* Chart Modal */}
       <ChartSelect
         isOpen={isPopupVisible}
         dataset={datatypeName}
+        columns={columns}
         onClose={closeChartModal}
         onInputSubmit={handleChartInput}
+      />
+      <AddRow
+        isOpen={isAddPopup}
+        onClose={closeAddModal}
+        onInputSubmit={handleAddInput}
+        columns={columns}
       />
     </div>
   );

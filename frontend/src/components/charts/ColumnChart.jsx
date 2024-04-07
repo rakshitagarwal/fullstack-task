@@ -1,8 +1,12 @@
 import React from 'react';
 import Chart from 'react-apexcharts';
 
-const ColumnChart = () => {
-  const data = 42;
+const ColumnChart = ({selected, columns, rowsData}) => {
+  console.log('selected',selected);
+  console.log('colDefs',columns);
+  console.log('rowsData',rowsData);
+
+  const chartData = 42;
   const options = {
     chart: {
       type: 'bar',
@@ -14,14 +18,14 @@ const ColumnChart = () => {
       },
     },
     xaxis: {
-      categories: ['Category'],
+      categories: [`Category`],
     },
   };
 
   return (
     <Chart
       options={options}
-      series={[{ data: [data] }]}
+      series={[{ data: [chartData] }]}
       type="bar"
       height={350}
     />

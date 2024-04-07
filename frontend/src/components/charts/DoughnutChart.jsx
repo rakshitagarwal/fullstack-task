@@ -1,9 +1,18 @@
 import React from 'react';
 import Chart from 'react-apexcharts';
 
-const DoughnutChart = ({ data }) => {
+const DoughnutChart = ({selected, columns, rowsData}) => {
+  console.log('selected',selected);
+  console.log('colDefs',columns);
+  console.log('rowsData',rowsData);
+
+  const chartData = {
+    labels: ['Team A', 'Team B', 'Team C', 'Team D'],
+    series: [44, 55, 13, 43]
+  };
+
   const options = {
-    labels: data.labels,
+    labels: chartData.labels,
     responsive: [{
       breakpoint: 480,
       options: {
@@ -20,7 +29,7 @@ const DoughnutChart = ({ data }) => {
   return (
     <Chart
       options={options}
-      series={data.series}
+      series={chartData.series}
       type="donut"
       width="100%"
     />

@@ -59,13 +59,13 @@ export default function Navbar() {
                 <Collapse in={open} timeout="auto" unmountOnExit>
                   <List component="div" disablePadding>
                     <ListItem button>
-                      <ListItemText primary="Home" />
+                      <ListItemText primary="Create Table" />
                     </ListItem>
                     <ListItem button>
-                      <ListItemText primary="About" />
+                      <ListItemText primary="Create Chart" />
                     </ListItem>
                     <ListItem button>
-                      <ListItemText primary="Contact" />
+                      <ListItemText primary="Other Functionality" />
                     </ListItem>
                   </List>
                 </Collapse>
