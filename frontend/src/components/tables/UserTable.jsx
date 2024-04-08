@@ -41,10 +41,6 @@ function UserTable({ tableName, datatypeName }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const fileInputRef = useRef(null);
 
-  // useEffect(() => {
-  //   dispatch(readData({ tableName, datatypeName }));
-  // }, [dispatch]);
-
   const getExention = (file) => {
     const parts = file.name.split(".");
     const extension = parts[parts.length - 1];
@@ -76,11 +72,11 @@ function UserTable({ tableName, datatypeName }) {
       const heads = headers.map((head) => ({ title: head, field: head }));
       setColDefs(heads);
       fileData.splice(0, 1);
-      if(!fileData[fileData.length-1].length) fileData.pop();
+      if (!fileData[fileData.length - 1].length) fileData.pop();
       const convertedData = convertToJSON(headers, fileData);
       setData(convertedData);
       setColumns(headers);
-      dispatch(createData({headers, rows: convertedData, tableName, datatypeName }));
+      dispatch(createData({ headers, rows: convertedData, tableName, datatypeName }));
     };
 
     if (file) {
@@ -106,7 +102,7 @@ function UserTable({ tableName, datatypeName }) {
   };
 
   const handleAddInput = (input) => {
-    dispatch(insertRow({ tableName, datatypeName, value: input}));
+    dispatch(insertRow({ tableName, datatypeName, value: input }));
   };
 
   const openChartModal = () => {
@@ -149,38 +145,50 @@ function UserTable({ tableName, datatypeName }) {
             }}
           >
             <div style={{ marginLeft: "auto", marginRight: "10px" }}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={openAddModal}
-            >
-              Add Row
-            </Button>&nbsp;&nbsp;
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleUploadButtonClick}
-              >
-                Upload
-              </Button>
-              <input
-                type="file"
-                ref={fileInputRef}
-                style={{ display: "none" }}
-                onChange={importExcel}
-              />
+              {colDefs ? (
+                <>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={openAddModal}
+                  >
+                    Add Row
+                  </Button>&nbsp;&nbsp;
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={openChartModal}
+                  >
+                    Chart
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleUploadButtonClick}
+                  >
+                    Upload
+                  </Button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    style={{ display: "none" }}
+                    onChange={importExcel}
+                  />
+                </>
+              )}
             </div>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={openChartModal}
-            >
-              Chart
-            </Button>
           </div>
           <br />
           {colDefs ? (
-            <FileTable colDefs={colDefs} rowsData={rowsData}  tableName={tableName} datatypeName={datatypeName} />
+            <FileTable
+              colDefs={colDefs}
+              rowsData={rowsData}
+              tableName={tableName}
+              datatypeName={datatypeName}
+            />
           ) : (
             <h2 style={{ textAlign: "center" }}>No Data</h2>
           )}

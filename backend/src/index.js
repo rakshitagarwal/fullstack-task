@@ -61,8 +61,8 @@ app.post("/api/v1/add", async (req, res) => {
 //get all table details
 app.get("/api/v1", async (req, res) => {
   try {
-    const dataView = req.body;
-    const FindData = await prisma.dynamicTable.findFirst({
+    const dataView = req.query;
+    const result = await prisma.dynamicTable.findFirst({
       where: {
         tableName: dataView.tableName,
         datatypeName: dataView.datatypeName,
@@ -71,8 +71,7 @@ app.get("/api/v1", async (req, res) => {
         id: "asc",
       },
     });
-    // console.log("records found",FindData);
-    res.status(200).json({ msg: "Data found successfully" });
+    res.status(200).json({ ...result });
   } catch (err) {
     console.error(err.message);
   }

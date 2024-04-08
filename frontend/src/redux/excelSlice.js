@@ -13,7 +13,6 @@ export const createData = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const response = await axios.post("http://localhost:5000/api/v1", data);
-      console.log("create data in slice", response.data);
       return  response.data;
     } catch (error) {
       return rejectWithValue(error);
@@ -27,7 +26,6 @@ export const insertRow = createAsyncThunk(
   async (toInsert, { rejectWithValue }) => {
     try {
       const response = await axios.post("http://localhost:5000/api/v1/add", toInsert);
-      console.log("insert data in slice",response.data);
       return  response.data;
     } catch (error) {
       return rejectWithValue(error);
@@ -35,19 +33,19 @@ export const insertRow = createAsyncThunk(
   }
 );
 
-// read action
-export const readData = createAsyncThunk(
-  "readData",
-  async (toView, { rejectWithValue }) => {
-    try {
-      const response = await axios.get("http://localhost:5000/api/v1", {toView});
-      console.log("read data in slice",response.data);
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error);
-    }
-  }
-);
+// // read action
+// export const readData = createAsyncThunk(
+//   "readData",
+//   async (toView, { rejectWithValue }) => {
+//     try {
+//       const queryParams = new URLSearchParams(toView).toString();
+//         const response = await axios.get(`http://localhost:5000/api/v1?${queryParams}`);
+//       return response.data;
+//     } catch (error) {
+//       return rejectWithValue(error);
+//     }
+//   }
+// );
 
 // update action
 export const updateData = createAsyncThunk(
@@ -56,7 +54,6 @@ export const updateData = createAsyncThunk(
     try {
       const {index , ...data} = toEdit;
       const response = await axios.put(`http://localhost:5000/api/v1/${index}`, {data});
-      console.log("update data in slice",response.data);
       return response.data;
     } catch (error) {
       return rejectWithValue(error);
@@ -71,7 +68,6 @@ export const deleteData = createAsyncThunk(
     try {
       const {index , ...data} = toDelete;
       const response = await axios.delete(`http://localhost:5000/api/v1/${index}`, { data });
-      console.log("delete data in slice",response.data);
       return response.data;
     } catch (error) {
       return rejectWithValue(error);
@@ -100,10 +96,10 @@ export const excelSlice = createSlice({
         }
         state.data = temp; 
       })
-      .addCase(readData.fulfilled, (state, action) => {
-        state.loading = false;
-        state.data = action.payload;
-      })
+      // .addCase(readData.fulfilled, (state, action) => {
+      //   state.loading = false;
+      //   // state.data = action.payload;
+      // })
       .addCase(updateData.fulfilled, (state, action) => {
         state.loading = false;
         let temp = state.data;

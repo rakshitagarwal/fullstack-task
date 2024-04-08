@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ThemeProvider } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -15,14 +15,22 @@ import EditRow from "../modals/EditRow";
 import { useDispatch, useSelector } from "react-redux";
 import { updateData, deleteData } from "../../redux/excelSlice";
 
-const FileTable = ({ colDefs, rowsData,  tableName, datatypeName }) => {
+const FileTable = ({ colDefs, tableName, datatypeName }) => {
   const dispatch = useDispatch();
   const { data, status } = useSelector((state) => state.excel);
   const [isEditPopup, setEditPopup] = useState(false);
   const [editData, setEditData] = useState({});
   const [editIndex, setEditIndex] = useState(null);
+  const [rowsData, setData] = useState([]);
 
-  const openEditModal = ( row, index) => {
+  // Update local state when redux state changes
+  useEffect(() => {
+    // Set data from Redux state to local state
+    setData(data.find(table => table.tableName === tableName)?.rows || []);
+  }, [data, tableName]);
+
+
+  const openEditModal = (row, index) => {
     setEditPopup(true);
     setEditData(row);
     setEditIndex(index);
@@ -33,8 +41,7 @@ const FileTable = ({ colDefs, rowsData,  tableName, datatypeName }) => {
   };
 
   const handleEditClick = (toEdit) => {
-    // console.log('update data', toEdit);
-    dispatch(updateData({index: editIndex,  tableName, datatypeName , value: toEdit}));
+    dispatch(updateData({ index: editIndex, tableName, datatypeName, value: toEdit }));
   };
 
   const handleDeleteClick = (toDelete) => {
@@ -43,53 +50,53 @@ const FileTable = ({ colDefs, rowsData,  tableName, datatypeName }) => {
 
   return (
     <>
-    <ThemeProvider theme={theme}>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              {colDefs &&
-                colDefs.map((colDef) => (
-                  <TableCell key={colDef.field}>{colDef.title}</TableCell>
+      <ThemeProvider theme={theme}>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                {colDefs &&
+                  colDefs.map((colDef) => (
+                    <TableCell key={colDef.field}>{colDef.title}</TableCell>
+                  ))}
+                {colDefs && <TableCell>Action</TableCell>}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {rowsData &&
+                rowsData.map((row, index) => (
+                  <TableRow key={index}>
+                    {colDefs &&
+                      colDefs.map((colDef, index) => (
+                        <TableCell key={colDef.field}>
+                          {row[colDef.field]}
+                        </TableCell>
+                      ))}
+                    <TableCell style={{ width: "100px" }}>
+                      {Object.keys(row).length !== 0 && (
+                        <>
+                          <IconButton
+                            aria-label="edit"
+                            onClick={() => openEditModal(row, index)}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton
+                            aria-label="delete"
+                            onClick={() => handleDeleteClick({ row, index, tableName, datatypeName })}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </>
+                      )}
+                    </TableCell>
+                  </TableRow>
                 ))}
-              {colDefs && <TableCell>Action</TableCell>}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rowsData &&
-              rowsData.map((row, index) => (
-                <TableRow key={index}>
-                  {colDefs &&
-                    colDefs.map((colDef, index) => (
-                      <TableCell key={colDef.field}>
-                        {row[colDef.field]}
-                      </TableCell>
-                    ))}
-                  <TableCell style={{ width: "100px" }}>
-                    {Object.keys(row).length !== 0 && (
-                      <>
-                        <IconButton
-                          aria-label="edit"
-                          onClick={() => openEditModal(row, index)}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                        <IconButton
-                          aria-label="delete"
-                          onClick={() => handleDeleteClick({ row, index, tableName, datatypeName })}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </ThemeProvider>
-    {isEditPopup && (
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </ThemeProvider>
+      {isEditPopup && (
         <EditRow
           isOpen={isEditPopup}
           onClose={closeEditModal}
