@@ -28,8 +28,8 @@ const ColumnChart = ({ chartName, selected, columns, rowsData }) => {
         series={[{ data: filteredData }]} // Use filteredData as the data for the series
         type="bar"
         height={350}
-        />
-        </div>
+      />
+    </div>
   );
 };
 

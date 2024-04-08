@@ -1,21 +1,22 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import XLSX from "xlsx";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import ChartSelect from "../modals/ChartSelect";
-import { createData, readData, insertRow } from "../../redux/excelSlice";
+import { createData, insertRow } from "../../redux/excelSlice";
 import { Button } from "@mui/material";
 import AddRow from "../modals/AddRow";
-import PieChart from "../charts_props/PieChart";
-import LineChart from "../charts_props/LineChart";
-import DoughnutChart from "../charts_props/DoughnutChart";
-import ColumnChart from "../charts_props/ColumnChart";
-import BarChart from "../charts_props/BarChart";
-import RadialBarChart from "../charts_props/RadialBartChart";
-import SemiCircleGaugeChart from "../charts_props/SemiCircleGauge";
+import PieChart from "../charts/PieChart";
+import LineChart from "../charts/LineChart";
+import DoughnutChart from "../charts/DoughnutChart";
+import ColumnChart from "../charts/ColumnChart";
+import BarChart from "../charts/BarChart";
+import RadialBarChart from "../charts/RadialBartChart";
+import SemiCircleGaugeChart from "../charts/SemiCircleGauge";
 import FileTable from "./FileTable";
 
-const EXTENSIONS = ["xlsx", "xls", "csv"];
+const EXTENSIONS = ["xlsx", "xls", "csv"]; //file extensions supported
 
+// selection from these charts options
 const chartComponents = {
   1: PieChart,
   2: LineChart,
@@ -26,10 +27,8 @@ const chartComponents = {
   7: SemiCircleGaugeChart,
 };
 
-function UserTable({ tableName, datatypeName }) {
+const UserTable = ({ tableName, datatypeName }) => {
   const dispatch = useDispatch();
-  const { data, status } = useSelector((state) => state.excel);
-  console.log("global data array", data);
   const [colDefs, setColDefs] = useState(null);
   const [rowsData, setData] = useState(null);
   const [chart, setChart] = useState(null);
@@ -76,7 +75,9 @@ function UserTable({ tableName, datatypeName }) {
       const convertedData = convertToJSON(headers, fileData);
       setData(convertedData);
       setColumns(headers);
-      dispatch(createData({ headers, rows: convertedData, tableName, datatypeName }));
+      dispatch(
+        createData({ headers, rows: convertedData, tableName, datatypeName })
+      );
     };
 
     if (file) {
@@ -91,36 +92,44 @@ function UserTable({ tableName, datatypeName }) {
     }
   };
 
+  // leades to file selection for import
   const handleUploadButtonClick = () => {
     fileInputRef.current.click();
   };
 
+  // leades to sumit values from select chart modal
   const handleChartInput = (input) => {
     setChart(input.chart);
     setField(input.field);
     setChartName(input.widgetTitle);
   };
 
+  // leades to sumit values from inset row modal
   const handleAddInput = (input) => {
     dispatch(insertRow({ tableName, datatypeName, value: input }));
   };
 
+  // leades to opening of select chart modal
   const openChartModal = () => {
     setPopupVisible(true);
   };
 
+  // leades to closing of select chart modal
   const closeChartModal = () => {
     setPopupVisible(false);
   };
 
+  // leades to opening insert row modal
   const openAddModal = () => {
     setAddPopup(true);
   };
 
+  // leades to closing insert row modal
   const closeAddModal = () => {
     setAddPopup(false);
   };
 
+  // leades to expand or collapse of table
   const toggleAccordion = () => {
     setIsCollapsed(!isCollapsed);
   };
@@ -153,7 +162,8 @@ function UserTable({ tableName, datatypeName }) {
                     onClick={openAddModal}
                   >
                     Add Row
-                  </Button>&nbsp;&nbsp;
+                  </Button>
+                  &nbsp;&nbsp;
                   <Button
                     variant="contained"
                     color="primary"
@@ -194,8 +204,6 @@ function UserTable({ tableName, datatypeName }) {
           )}
           {ChartComponent && (
             <div style={{ width: "450px", height: "350px" }}>
-              <br />
-              <br />
               <ChartComponent
                 chartName={chartName}
                 selected={field}
@@ -204,6 +212,8 @@ function UserTable({ tableName, datatypeName }) {
               />
             </div>
           )}
+          <br />
+          <br />
         </>
       )}
 
@@ -222,6 +232,6 @@ function UserTable({ tableName, datatypeName }) {
       />
     </div>
   );
-}
+};
 
 export default UserTable;

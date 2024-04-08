@@ -1,29 +1,29 @@
-import React from 'react';
-import Chart from 'react-apexcharts';
+import React from "react";
+import Chart from "react-apexcharts";
 
-const BarChart = ({selected, columns, rowsData}) => {
-  console.log('selected',selected);
-  console.log('colDefs',columns);
-  console.log('rowsData',rowsData);
+const BarChart = ({ chartName, selected, columns, rowsData }) => {
+  console.log("selected", selected);
+  console.log("colDefs", columns);
+  console.log("rowsData", rowsData);
 
   const chartData = {
-    categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+    categories: ["Jan", "Feb", "Mar", "Apr", "May"],
     series: [
       {
-        name: 'Series 1',
-        data: [30, 40, 45, 50, 49]
+        name: "Series 1",
+        data: [30, 40, 45, 50, 49],
       },
       {
-        name: 'Series 2',
-        data: [35, 45, 50, 55, 60]
-      }
-    ]
+        name: "Series 2",
+        data: [35, 45, 50, 55, 60],
+      },
+    ],
   };
 
   const options = {
     chart: {
-      type: 'bar',
-      height: 350
+      type: "bar",
+      height: 350,
     },
     plotOptions: {
       bar: {
@@ -36,12 +36,15 @@ const BarChart = ({selected, columns, rowsData}) => {
   };
 
   return (
-    <Chart
-      options={options}
-      series={chartData.series}
-      type="bar"
-      height={350}
-    />
+    <div>
+      <h2>{chartName}</h2>
+      <Chart
+        options={options}
+        series={chartData.series}
+        type="bar"
+        height={350}
+      />
+    </div>
   );
 };
 

@@ -1,15 +1,15 @@
-import React from 'react';
-import Chart from 'react-apexcharts';
+import React from "react";
+import Chart from "react-apexcharts";
 
-const RadialBarChart = ({selected, columns, rowsData}) => {
-  console.log('selected',selected);
-  console.log('colDefs',columns);
-  console.log('rowsData',rowsData);
+const RadialBarChart = ({ chartName, selected, columns, rowsData }) => {
+  console.log("selected", selected);
+  console.log("colDefs", columns);
+  console.log("rowsData", rowsData);
 
   const chartData = {
-    labels: ['Series 1', 'Series 2', 'Series 3', 'Series 4'],
+    labels: ["Series 1", "Series 2", "Series 3", "Series 4"],
     series: [44, 55, 67, 83],
-    total: 249 // Total value of all series, used in dataLabels.total formatter
+    total: 249, // Total value of all series, used in dataLabels.total formatter
   };
 
   const options = {
@@ -18,31 +18,34 @@ const RadialBarChart = ({selected, columns, rowsData}) => {
       radialBar: {
         dataLabels: {
           name: {
-            fontSize: '22px',
+            fontSize: "22px",
           },
           value: {
-            fontSize: '16px',
+            fontSize: "16px",
           },
           total: {
             show: true,
-            label: 'Total',
+            label: "Total",
             formatter: function (w) {
               // By default, the 'w' parameter contains the total value. You can format it here if needed.
-              return chartData.total || '';
-            }
-          }
-        }
-      }
-    }
+              return chartData.total || "";
+            },
+          },
+        },
+      },
+    },
   };
 
   return (
+    <div>
+      <h2>{chartName}</h2>
     <Chart
       options={options}
       series={chartData.series}
       type="radialBar"
       width="100%"
     />
+    </div>
   );
 };
 

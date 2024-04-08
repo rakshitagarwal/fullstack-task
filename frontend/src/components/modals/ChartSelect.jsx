@@ -152,15 +152,17 @@ const ChartSelect = ({ isOpen, dataset, columns, onClose, onInputSubmit }) => {
                   setField(event.target.value);
                 }}
               >
-                {columns.map((column, index) =>{
-                  return(
-                    <MenuItem key={index} value={column}>{column}</MenuItem>
-                  )
+                {columns.map((column, index) => {
+                  return (
+                    <MenuItem key={index} value={column}>
+                      {column}
+                    </MenuItem>
+                  );
                 })}
               </Select>
             </FormControl>
-              <br />
-              <br />
+            <br />
+            <br />
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
               <Button
                 onClick={() => {

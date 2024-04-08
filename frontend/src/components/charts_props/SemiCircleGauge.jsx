@@ -1,16 +1,16 @@
-import React from 'react';
-import Chart from 'react-apexcharts';
+import React from "react";
+import Chart from "react-apexcharts";
 
-const SemiCircleGaugeChart = ({ chartName, selected, columns, rowsData}) => {
-  console.log('selected', selected);
-  console.log('colDefs', columns);
-  console.log('rowsData', rowsData);
+const SemiCircleGaugeChart = ({ chartName, selected, columns, rowsData }) => {
+  console.log("selected", selected);
+  console.log("colDefs", columns);
+  console.log("rowsData", rowsData);
 
   // Step 1: Find the index of the selected item
   const selectedIndex = columns.indexOf(selected);
 
   // Step 2: Extract values corresponding to the selected key
-  const selectedValues = rowsData.map(row => row[selected]);
+  const selectedValues = rowsData.map((row) => row[selectedIndex]);
 
   // Step 3: Calculate the average value
   const sum = selectedValues.reduce((acc, val) => acc + val, 0);
@@ -21,10 +21,10 @@ const SemiCircleGaugeChart = ({ chartName, selected, columns, rowsData}) => {
 
   const options = {
     chart: {
-      type: 'radialBar',
+      type: "radialBar",
       height: 350,
       offsetX: -10,
-      offsetY: -20
+      offsetY: -20,
     },
     plotOptions: {
       radialBar: {
@@ -32,8 +32,8 @@ const SemiCircleGaugeChart = ({ chartName, selected, columns, rowsData}) => {
         endAngle: 135,
         hollow: {
           margin: 0,
-          size: '70%',
-          background: 'transparent',
+          size: "70%",
+          background: "transparent",
           image: undefined,
         },
         dataLabels: {
@@ -42,43 +42,43 @@ const SemiCircleGaugeChart = ({ chartName, selected, columns, rowsData}) => {
           },
           value: {
             offsetY: 25,
-            fontSize: '22px',
-            color: '#1e88e5',
+            fontSize: "22px",
+            color: "#1e88e5",
             formatter: function (val) {
-              return val + '%';
-            }
-          }
-        }
-      }
+              return val + "%";
+            },
+          },
+        },
+      },
     },
     fill: {
-      type: 'gradient',
+      type: "gradient",
       gradient: {
-        shade: 'dark',
-        type: 'horizontal',
+        shade: "dark",
+        type: "horizontal",
         shadeIntensity: 0.5,
-        gradientToColors: ['#FFD700'],
+        gradientToColors: ["#FFD700"],
         inverseColors: true,
         opacityFrom: 1,
         opacityTo: 1,
-        stops: [0, 100]
-      }
+        stops: [0, 100],
+      },
     },
     stroke: {
-      dashArray: 4
+      dashArray: 4,
     },
-    labels: ['Progress'],
+    labels: ["Progress"],
   };
 
   return (
     <div>
-    <h2>{chartName}</h2>
-    <Chart
-      options={options}
-      series={[chartData]}
-      type="radialBar"
-      width="100%"
-    />
+      <h2>{chartName}</h2>
+      <Chart
+        options={options}
+        series={[chartData]}
+        type="radialBar"
+        width="100%"
+      />
     </div>
   );
 };

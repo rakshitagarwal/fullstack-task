@@ -49,7 +49,6 @@ export default function Navbar() {
                     variant="h6"
                     color="inherit"
                     onClick={() => {
-                      console.log("logo clicked");
                       setOpen(false);
                     }}
                   >

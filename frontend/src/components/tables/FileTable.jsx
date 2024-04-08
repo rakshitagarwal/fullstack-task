@@ -17,10 +17,10 @@ import { updateData, deleteData } from "../../redux/excelSlice";
 
 const FileTable = ({ colDefs, tableName, datatypeName }) => {
   const dispatch = useDispatch();
-  const { data, status } = useSelector((state) => state.excel);
+  const { data } = useSelector((state) => state.excel); // data array from redux state
   const [isEditPopup, setEditPopup] = useState(false);
   const [editData, setEditData] = useState({});
-  const [editIndex, setEditIndex] = useState(null);
+  const [editIndex, setEditIndex] = useState(null); // save index from table view 
   const [rowsData, setData] = useState([]);
 
   // Update local state when redux state changes
@@ -29,21 +29,24 @@ const FileTable = ({ colDefs, tableName, datatypeName }) => {
     setData(data.find(table => table.tableName === tableName)?.rows || []);
   }, [data, tableName]);
 
-
+  // leads to edit modal for updating a row from table
   const openEditModal = (row, index) => {
     setEditPopup(true);
     setEditData(row);
     setEditIndex(index);
   };
 
+    // leads to closing edit modal
   const closeEditModal = () => {
     setEditPopup(false);
   };
 
+    // leads to submit values in edit modal for updating a row from table
   const handleEditClick = (toEdit) => {
     dispatch(updateData({ index: editIndex, tableName, datatypeName, value: toEdit }));
   };
 
+    // leads to delete a row from table
   const handleDeleteClick = (toDelete) => {
     dispatch(deleteData(toDelete));
   };

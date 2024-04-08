@@ -1,138 +1,20 @@
-import express from "express";
-import cors from "cors";
-import prisma from "./config/db.js";
-import dotenv from "dotenv";
-dotenv.config();
+import express from "express"; // Importing Express framework
+import cors from "cors"; // Importing CORS middleware for enabling cross-origin requests
+import excelRoutes from './routes/index.js'; // Importing routes for Excel functionality
+import API_PATH from "./utils/constants.js"; // Importing API path constant
+import dotenv from "dotenv"; // Importing dotenv for environment variable management
+dotenv.config(); // Loading environment variables from .env file
 
-const app = express();
-const PORT = process.env.PORT || 5001;
+const app = express(); // Creating Express app instance
+const PORT = process.env.PORT || 5001; // Setting port from environment variable or defaulting to 5001 if not provided
 
-app.use(cors());
-app.use(express.json());
+app.use(cors()); // Adding CORS middleware to allow cross-origin requests
+app.use(express.json()); // Adding middleware to parse JSON request bodies
 
-// create data
-app.post("/api/v1", async (req, res) => {
-  try {
-    const { headers, rows, tableName, datatypeName } = req.body;
-    const result = await prisma.dynamicTable.create({
-      data: {
-        tableName,
-        datatypeName,
-        headers,
-        rows,
-      },
-    });
-   
-    res.status(201).json({ ...result });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
+// Mounting Excel routes under specified API path
+app.use(API_PATH, excelRoutes);
 
-// insert a new record
-app.post("/api/v1/add", async (req, res) => {
-  try {
-    const dataAdd = req.body;
-    const FindData = await prisma.dynamicTable.findFirst({
-      where: {
-        tableName: dataAdd.tableName,
-        datatypeName: dataAdd.datatypeName,
-      },
-      orderBy: {
-        id: "asc",
-      },
-    });
-    const addedRows = FindData.rows;
-    addedRows.push(dataAdd.value);
-    const result = await prisma.dynamicTable.update({
-      where: {
-        id: FindData.id,
-      },
-      data: { rows: addedRows },
-    });
-    res.status(201).json({ ...result });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-//get all table details
-app.get("/api/v1", async (req, res) => {
-  try {
-    const dataView = req.query;
-    const result = await prisma.dynamicTable.findFirst({
-      where: {
-        tableName: dataView.tableName,
-        datatypeName: dataView.datatypeName,
-      },
-      orderBy: {
-        id: "asc",
-      },
-    });
-    res.status(200).json({ ...result });
-  } catch (err) {
-    console.error(err.message);
-  }
-});
-
-//update data
-app.put("/api/v1/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const dataEdit = req.body.data;
-    const FindData = await prisma.dynamicTable.findFirst({
-      where: {
-        tableName: dataEdit.tableName,
-        datatypeName: dataEdit.datatypeName,
-      },
-      orderBy: {
-        id: "asc",
-      },
-    });
-    let updatedRows = FindData.rows;
-    updatedRows[+id] = dataEdit.value;
-    const result = await prisma.dynamicTable.update({
-      where: {
-        id: FindData.id,
-      },
-      data: { rows: updatedRows },
-    });
-    res.status(200).json({ ...result });
-  } catch (err) {
-    console.error(err.message);
-  }
-});
-
-//delete data
-app.delete("/api/v1/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const dataDelete = req.body;
-    const FindData = await prisma.dynamicTable.findFirst({
-      where: {
-        tableName: dataDelete.tableName,
-        datatypeName: dataDelete.datatypeName,
-      },
-      orderBy: {
-        id: "asc",
-      },
-    });
-    const delVal = FindData.rows[+id];
-    let updatedRows = FindData.rows.filter((row) => row !== delVal);
-    const result = await prisma.dynamicTable.update({
-      where: {
-        id: FindData.id,
-      },
-      data: { rows: updatedRows },
-    });
-    res.status(200).json({ ...result });
-  } catch (err) {
-    console.log(err.message);
-  }
-});
-
+// Starting the Express server
 app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}!`);
+  console.log(`Server listening on port ${PORT}!`); // Logging server start message
 });

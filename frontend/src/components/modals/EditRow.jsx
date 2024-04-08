@@ -43,9 +43,7 @@ const EditRow = ({ isOpen, onClose, values, onInputSubmit }) => {
         ))}
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSubmit}>
-            Update
-          </Button>
+          <Button onClick={handleSubmit}>Update</Button>
         </div>
       </div>
     </Modal>
